@@ -1,6 +1,6 @@
 import xdr from './xdr';
 import { hash } from './hashing';
-
+import { base64ToUint8Array } from './util/BrowserBuffer';
 import { Transaction } from './transaction';
 import { TransactionBase } from './transaction_base';
 import { encodeMuxedAccountToAddress } from './util/decode_encode_muxed_account';
@@ -24,7 +24,7 @@ import { encodeMuxedAccountToAddress } from './util/decode_encode_muxed_account'
 export class FeeBumpTransaction extends TransactionBase {
   constructor(envelope, networkPassphrase) {
     if (typeof envelope === 'string') {
-      const buffer = Buffer.from(envelope, 'base64');
+      const buffer = base64ToUint8Array(envelope);
       envelope = xdr.TransactionEnvelope.fromXDR(buffer);
     }
 
@@ -76,7 +76,7 @@ export class FeeBumpTransaction extends TransactionBase {
    *
    * It is composed of a 4 prefix bytes followed by the xdr-encoded form
    * of this transaction.
-   * @returns {Buffer}
+   * @returns {Uint8Array}
    */
   signatureBase() {
     const taggedTransaction =

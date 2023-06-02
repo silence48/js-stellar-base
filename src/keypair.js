@@ -4,11 +4,14 @@ import nacl from 'tweetnacl';
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
 
+import {concatArrayTypedArrays, Uint8equals, Uint8ArrayAlloc} from './utils/BrowserBuffer'
+
 import { sign, verify, generate } from './signing';
 import { StrKey } from './strkey';
 import { hash } from './hashing';
 
 import xdr from './xdr';
+import {  } from './util/BrowserBuffer';
 
 /**
  * `Keypair` represents public (and secret) keys of the account.
@@ -24,8 +27,8 @@ import xdr from './xdr';
  * @constructor
  * @param {object} keys At least one of keys must be provided.
  * @param {string} keys.type Public-key signature system name. (currently only `ed25519` keys are supported)
- * @param {Buffer} [keys.publicKey] Raw public key
- * @param {Buffer} [keys.secretKey] Raw secret key (32-byte secret seed in ed25519`)
+ * @param {Uint8Array} [keys.publicKey] Raw public key
+ * @param {Uint8Array} [keys.secretKey] Raw secret key (32-byte secret seed in ed25519`)
  */
 export class Keypair {
   constructor(keys) {
@@ -36,7 +39,8 @@ export class Keypair {
     this.type = keys.type;
 
     if (keys.secretKey) {
-      keys.secretKey = Buffer.from(keys.secretKey);
+      //probably should make a copy here...
+      keys.secretKey = Uint8Array.from(keys.secretKey);
 
       if (keys.secretKey.length !== 32) {
         throw new Error('secretKey length is invalid');
@@ -44,16 +48,16 @@ export class Keypair {
 
       this._secretSeed = keys.secretKey;
       this._publicKey = generate(keys.secretKey);
-      this._secretKey = Buffer.concat([keys.secretKey, this._publicKey]);
+      this._secretKey = concatArrayTypedArrays([keys.secretKey, this._publicKey]);
 
       if (
         keys.publicKey &&
-        !this._publicKey.equals(Buffer.from(keys.publicKey))
+        !Uint8equals(this._publicKey, Uint8Array.from(keys.publicKey))
       ) {
         throw new Error('secretKey does not match publicKey');
       }
     } else {
-      this._publicKey = Buffer.from(keys.publicKey);
+      this._publicKey = Uint8Array.from(keys.publicKey);
 
       if (this._publicKey.length !== 32) {
         throw new Error('publicKey length is invalid');
@@ -75,7 +79,7 @@ export class Keypair {
   /**
    * Creates a new `Keypair` object from ed25519 secret key seed raw bytes.
    *
-   * @param {Buffer} rawSeed Raw 32-byte ed25519 secret key seed
+   * @param {Uint8Array} rawSeed Raw 32-byte ed25519 secret key seed
    * @returns {Keypair}
    */
   static fromRawEd25519Seed(rawSeed) {
@@ -157,7 +161,7 @@ export class Keypair {
 
   /**
    * Returns raw public key
-   * @returns {Buffer}
+   * @returns {Uint8Array}
    */
   rawPublicKey() {
     return this._publicKey;
@@ -195,7 +199,7 @@ export class Keypair {
 
   /**
    * Returns raw secret key.
-   * @returns {Buffer}
+   * @returns {Uint8Array}
    */
   rawSecretKey() {
     return this._secretSeed;
@@ -211,8 +215,8 @@ export class Keypair {
 
   /**
    * Signs data.
-   * @param {Buffer} data Data to sign
-   * @returns {Buffer}
+   * @param {Uint8Array} data Data to sign
+   * @returns {Uint8Array}
    */
   sign(data) {
     if (!this.canSign()) {
@@ -224,8 +228,8 @@ export class Keypair {
 
   /**
    * Verifies if `signature` for `data` is valid.
-   * @param {Buffer} data Signed data
-   * @param {Buffer} signature Signature
+   * @param {Uint8Array} data Signed data
+   * @param {Uint8Array} signature Signature
    * @returns {boolean}
    */
   verify(data, signature) {
@@ -235,7 +239,7 @@ export class Keypair {
   /**
    * Returns the decorated signature (hint+sig) for arbitrary data.
    *
-   * @param  {Buffer} data  arbitrary data to sign
+   * @param  {Uint8Array} data  arbitrary data to sign
    * @return {xdr.DecoratedSignature}   the raw signature structure which can be
    *     added directly to a transaction envelope
    *
@@ -254,7 +258,7 @@ export class Keypair {
    *  The hint is defined as the last 4 bytes of the signer key XORed with last
    *  4 bytes of the payload (zero-left-padded if necessary).
    *
-   * @param  {Buffer} data    data to both sign and treat as the payload
+   * @param  {Uint8Array} data    data to both sign and treat as the payload
    * @return {xdr.DecoratedSignature}
    *
    * @see https://github.com/stellar/stellar-protocol/blob/master/core/cap-0040.md#signature-hint
@@ -264,10 +268,10 @@ export class Keypair {
     const signature = this.sign(data);
     const keyHint = this.signatureHint();
 
-    let hint = Buffer.from(data.slice(-4));
+    let hint = Uint8Array.from(data.slice(-4));
     if (hint.length < 4) {
       // append zeroes as needed
-      hint = Buffer.concat([hint, Buffer.alloc(4 - data.length, 0)]);
+      hint = concatArrayTypedArrays([hint, Uint8ArrayAlloc(4 - data.length, 0)]);
     }
 
     return new xdr.DecoratedSignature({

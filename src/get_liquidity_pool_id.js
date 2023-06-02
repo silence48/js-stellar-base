@@ -1,6 +1,7 @@
 import xdr from './xdr';
 import { Asset } from './asset';
 import { hash } from './hashing';
+import {concatArrayTypedArrays} from './utils/BrowserBuffer';
 
 // LiquidityPoolFeeV18 is the default liquidity pool fee in protocol v18. It defaults to 30 base points (0.3%).
 export const LiquidityPoolFeeV18 = 30;
@@ -17,7 +18,7 @@ export const LiquidityPoolFeeV18 = 30;
  * @param {Asset}  liquidityPoolParameters.assetB – The second asset in the Pool, it must respect the rule assetA < assetB.
  * @param {number} liquidityPoolParameters.fee    – The liquidity pool fee. For now the only fee supported is `30`.
  *
- * @return {Buffer} the raw Pool ID buffer, which can be stringfied with `toString('hex')`
+ * @return {Uint8Array} the raw Pool ID buffer, which can be stringfied with `toString('hex')`
  */
 export function getLiquidityPoolId(
   liquidityPoolType,
@@ -49,6 +50,6 @@ export function getLiquidityPoolId(
     assetB: assetB.toXDRObject(),
     fee
   }).toXDR();
-  const payload = Buffer.concat([lpTypeData, lpParamsData]);
+  const payload = concatArrayTypedArrays([lpTypeData, lpParamsData]);
   return hash(payload);
 }

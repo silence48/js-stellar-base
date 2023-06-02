@@ -259,5 +259,18 @@ export class Asset {
  * @warning No type-checks are done on the parameters
  */
 function asciiCompare(a, b) {
-  return Buffer.compare(Buffer.from(a, 'ascii'), Buffer.from(b, 'ascii'));
+  const len = Math.min(a.length, b.length);
+
+  for (let i = 0; i < len; i++) {
+    const diff = a.charCodeAt(i) - b.charCodeAt(i);
+    if (diff !== 0) {
+      return diff < 0 ? -1 : 1;
+    }
+  }
+
+  if (a.length === b.length) {
+    return 0;
+  } else {
+    return a.length < b.length ? -1 : 1;
+  }
 }

@@ -1,3 +1,4 @@
+import BrowserBuffer, {Uint8ArrayAlloc, concatArrayTypedArrays} from './utils/BrowserBuffer'
 //  This module provides the signing functionality used by the stellar network
 //  The code below may look a little strange... this is because we try to provide
 //  the most efficient signing method possible.  First, we try to load the
@@ -47,21 +48,21 @@ function checkFastSigningNode() {
   }
 
   actualMethods.generate = (secretKey) => {
-    const pk = Buffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
-    const sk = Buffer.alloc(sodium.crypto_sign_SECRETKEYBYTES);
+    const pk = BrowserBuffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
+    const sk = BrowserBuffer.alloc(sodium.crypto_sign_SECRETKEYBYTES);
     sodium.crypto_sign_seed_keypair(pk, sk, secretKey);
     return pk;
   };
 
   actualMethods.sign = (data, secretKey) => {
-    data = Buffer.from(data);
-    const signature = Buffer.alloc(sodium.crypto_sign_BYTES);
+    data = BrowserBuffer.from(data);
+    const signature = BrowserBuffer.alloc(sodium.crypto_sign_BYTES);
     sodium.crypto_sign_detached(signature, data, secretKey);
     return signature;
   };
 
   actualMethods.verify = (data, signature, publicKey) => {
-    data = Buffer.from(data);
+    data = BrowserBuffer.from(data);
     try {
       return sodium.crypto_sign_verify_detached(signature, data, publicKey);
     } catch (e) {
@@ -79,26 +80,26 @@ function checkFastSigningBrowser() {
   const nacl = require('tweetnacl');
 
   actualMethods.generate = (secretKey) => {
-    const secretKeyUint8 = new Uint8Array(secretKey);
+    const secretKeyUint8 = new BrowserBuffer(secretKey);
     const naclKeys = nacl.sign.keyPair.fromSeed(secretKeyUint8);
-    return Buffer.from(naclKeys.publicKey);
+    return BrowserBuffer.from(naclKeys.publicKey);
   };
 
   actualMethods.sign = (data, secretKey) => {
-    data = Buffer.from(data);
-    data = new Uint8Array(data.toJSON().data);
-    secretKey = new Uint8Array(secretKey.toJSON().data);
+    data = BrowserBuffer.from(data);
+    data = new BrowserBuffer(data.toJSON().data);
+    secretKey = new BrowserBuffer(secretKey.toJSON().data);
 
     const signature = nacl.sign.detached(data, secretKey);
 
-    return Buffer.from(signature);
+    return BrowserBuffer.from(signature);
   };
 
   actualMethods.verify = (data, signature, publicKey) => {
-    data = Buffer.from(data);
-    data = new Uint8Array(data.toJSON().data);
-    signature = new Uint8Array(signature.toJSON().data);
-    publicKey = new Uint8Array(publicKey.toJSON().data);
+    data = BrowserBuffer.from(data);
+    data = new BrowserBuffer(data.toJSON().data);
+    signature = new BrowserBuffer(signature.toJSON().data);
+    publicKey = new BrowserBuffer(publicKey.toJSON().data);
 
     return nacl.sign.detached.verify(data, signature, publicKey);
   };
