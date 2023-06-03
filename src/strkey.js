@@ -6,6 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import { verifyChecksum } from './util/checksum';
+import BrowserBuffer from './util/BrowserBuffer';
 
 const versionBytes = {
   ed25519PublicKey: 6 << 3, // G (when encoded in base32)
@@ -296,7 +297,7 @@ export function decodeCheck(versionByteName, encoded) {
     throw new Error(`invalid checksum`);
   }
 
-  return Buffer.from(data);
+  return BrowserBuffer.from(data);
 }
 
 export function encodeCheck(versionByteName, data) {
@@ -312,19 +313,19 @@ export function encodeCheck(versionByteName, data) {
         `Expected one of ${Object.keys(versionBytes).join(', ')}`
     );
   }
-  data = Buffer.from(data);
+  data = BrowserBuffer.from(data);
 
-  const versionBuffer = Buffer.from([versionByte]);
-  const payload = Buffer.concat([versionBuffer, data]);
+  const versionBuffer = BrowserBuffer.from([versionByte]);
+  const payload = BrowserBuffer.concat([versionBuffer, data]);
   const checksum = calculateChecksum(payload);
-  const unencoded = Buffer.concat([payload, checksum]);
+  const unencoded = BrowserBuffer.concat([payload, checksum]);
 
   return base32.encode(unencoded);
 }
 
 // Computes the CRC16-XModem checksum of `payload` in little-endian order
 function calculateChecksum(payload) {
-  const checksum = Buffer.alloc(2);
+  const checksum = BrowserBuffer.alloc(2);
   checksum.writeUInt16LE(crc.crc16xmodem(payload), 0);
   return checksum;
 }

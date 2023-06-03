@@ -2,6 +2,7 @@
 
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
+import BrowserBuffer from '../util/BrowserBuffer';
 
 import xdr from '../xdr';
 import { Keypair } from '../keypair';
@@ -117,16 +118,16 @@ export function setOptions(opts) {
 
     if (opts.signer.preAuthTx) {
       if (isString(opts.signer.preAuthTx)) {
-        opts.signer.preAuthTx = Buffer.from(opts.signer.preAuthTx, 'hex');
+        opts.signer.preAuthTx = BrowserBuffer.from(opts.signer.preAuthTx, 'hex');
       }
 
       if (
         !(
-          Buffer.isBuffer(opts.signer.preAuthTx) &&
+          BrowserBuffer.isBuffer(opts.signer.preAuthTx) &&
           opts.signer.preAuthTx.length === 32
         )
       ) {
-        throw new Error('signer.preAuthTx must be 32 bytes Buffer.');
+        throw new Error('signer.preAuthTx must be 32 bytes BrowserBuffer.');
       }
 
       // eslint-disable-next-line new-cap
@@ -136,16 +137,16 @@ export function setOptions(opts) {
 
     if (opts.signer.sha256Hash) {
       if (isString(opts.signer.sha256Hash)) {
-        opts.signer.sha256Hash = Buffer.from(opts.signer.sha256Hash, 'hex');
+        opts.signer.sha256Hash = BrowserBuffer.from(opts.signer.sha256Hash, 'hex');
       }
 
       if (
         !(
-          Buffer.isBuffer(opts.signer.sha256Hash) &&
+          BrowserBuffer.isBuffer(opts.signer.sha256Hash) &&
           opts.signer.sha256Hash.length === 32
         )
       ) {
-        throw new Error('signer.sha256Hash must be 32 bytes Buffer.');
+        throw new Error('signer.sha256Hash must be 32 bytes BrowserBuffer.');
       }
 
       // eslint-disable-next-line new-cap

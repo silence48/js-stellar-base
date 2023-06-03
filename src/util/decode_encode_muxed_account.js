@@ -95,7 +95,7 @@ function _decodeAddressFullyToMuxedAccount(address) {
   // Decoding M... addresses cannot be done through a simple
   // MuxedAccountMed25519.fromXDR() call, because the definition is:
   //
-  //    constructor(attributes: { id: Uint64; ed25519: Buffer });
+  //    constructor(attributes: { id: Uint64; ed25519: BrowserBuffer });
   //
   // Note the ID is the first attribute. However, the ID comes *last* in the
   // stringified (base32-encoded) address itself (it's the last 8-byte suffix).
@@ -121,6 +121,6 @@ function _encodeMuxedAccountFullyToAddress(muxedAccount) {
 
   const muxed = muxedAccount.med25519();
   return StrKey.encodeMed25519PublicKey(
-    Buffer.concat([muxed.ed25519(), muxed.id().toXDR('raw')])
+    BrowserBuffer.concat([muxed.ed25519(), muxed.id().toXDR('raw')])
   );
 }

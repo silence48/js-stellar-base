@@ -11,6 +11,8 @@ import {
   extractBaseAddress,
   encodeMuxedAccountToAddress
 } from './util/decode_encode_muxed_account';
+import BrowserBuffer from './util/BrowserBuffer';
+
 
 /**
  * Use {@link TransactionBuilder} to build a transaction object. If you have an
@@ -34,7 +36,7 @@ import {
 export class Transaction extends TransactionBase {
   constructor(envelope, networkPassphrase) {
     if (typeof envelope === 'string') {
-      const buffer = Buffer.from(envelope, 'base64');
+      const buffer = BrowserBuffer.from(envelope, 'base64');
       envelope = xdr.TransactionEnvelope.fromXDR(buffer);
     }
 
@@ -263,7 +265,7 @@ export class Transaction extends TransactionBase {
     // we need a Transaction to generate the signature base
     if (this._envelopeType === xdr.EnvelopeType.envelopeTypeTxV0()) {
       tx = xdr.Transaction.fromXDR(
-        Buffer.concat([
+        BrowserBuffer.concat([
           // TransactionV0 is a transaction with the AccountID discriminant
           // stripped off, we need to put it back to build a valid transaction
           // which we can use to build a TransactionSignaturePayloadTaggedTransaction

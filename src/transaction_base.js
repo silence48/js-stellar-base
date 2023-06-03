@@ -1,6 +1,7 @@
 import xdr from './xdr';
 import { hash } from './hashing';
 import { Keypair } from './keypair';
+import BrowserBuffer from './util/BrowserBuffer';
 
 /**
  * @ignore
@@ -137,7 +138,7 @@ export class TransactionBase {
 
     let keypair;
     let hint;
-    const signatureBuffer = Buffer.from(signature, 'base64');
+    const signatureBuffer = BrowserBuffer.from(signature, 'base64');
 
     try {
       keypair = Keypair.fromPublicKey(publicKey);
@@ -178,7 +179,7 @@ export class TransactionBase {
    */
   signHashX(preimage) {
     if (typeof preimage === 'string') {
-      preimage = Buffer.from(preimage, 'hex');
+      preimage = BrowserBuffer.from(preimage, 'hex');
     }
 
     if (preimage.length > 64) {

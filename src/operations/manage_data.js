@@ -1,5 +1,6 @@
 import isString from 'lodash/isString';
 import xdr from '../xdr';
+import BrowserBuffer from '../util/BrowserBuffer';
 
 /**
  * This operation adds data entry to the ledger.
@@ -21,14 +22,14 @@ export function manageData(opts) {
 
   if (
     !isString(opts.value) &&
-    !Buffer.isBuffer(opts.value) &&
+    !BrowserBuffer.isBuffer(opts.value) &&
     opts.value !== null
   ) {
-    throw new Error('value must be a string, Buffer or null');
+    throw new Error('value must be a string, BrowserBuffer or null');
   }
 
   if (isString(opts.value)) {
-    attributes.dataValue = Buffer.from(opts.value);
+    attributes.dataValue = BrowserBuffer.from(opts.value);
   } else {
     attributes.dataValue = opts.value;
   }

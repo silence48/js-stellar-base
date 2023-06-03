@@ -1,3 +1,5 @@
+import BrowserBuffer from '../src/util/BrowserBuffer';
+
 describe('Asset', function () {
   describe('constructor', function () {
     it("throws an error when there's no issuer for non XLM type asset", function () {
@@ -99,19 +101,19 @@ describe('Asset', function () {
       let xdr = asset.toXDRObject();
       expect(xdr).to.be.instanceof(StellarBase.xdr.Asset);
       expect(xdr.toXDR().toString()).to.be.equal(
-        Buffer.from([0, 0, 0, 0]).toString()
+        BrowserBuffer.from([0, 0, 0, 0]).toString()
       );
 
       xdr = asset.toChangeTrustXDRObject();
       expect(xdr).to.be.instanceof(StellarBase.xdr.ChangeTrustAsset);
       expect(xdr.toXDR().toString()).to.be.equal(
-        Buffer.from([0, 0, 0, 0]).toString()
+        BrowserBuffer.from([0, 0, 0, 0]).toString()
       );
 
       xdr = asset.toTrustLineXDRObject();
       expect(xdr).to.be.instanceof(StellarBase.xdr.TrustLineAsset);
       expect(xdr.toXDR().toString()).to.be.equal(
-        Buffer.from([0, 0, 0, 0]).toString()
+        BrowserBuffer.from([0, 0, 0, 0]).toString()
       );
     });
 

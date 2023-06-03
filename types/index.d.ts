@@ -1,6 +1,7 @@
 // TypeScript Version: 2.9
 
 /// <reference types="node" />
+import BrowserBuffer from '../src/util/BrowserBuffer';
 import { xdr } from './xdr';
 
 export { xdr };
@@ -109,7 +110,7 @@ export const FastSigning: boolean;
 export type KeypairType = 'ed25519';
 
 export class Keypair {
-  static fromRawEd25519Seed(secretSeed: Buffer): Keypair;
+  static fromRawEd25519Seed(secretSeed: BrowserBuffer): Keypair;
   static fromSecret(secretKey: string): Keypair;
   static master(networkPassphrase: string): Keypair;
   static fromPublicKey(publicKey: string): Keypair;
@@ -119,26 +120,26 @@ export class Keypair {
     keys:
       | {
         type: KeypairType;
-        secretKey: string | Buffer;
-        publicKey?: string | Buffer
+        secretKey: string | BrowserBuffer;
+        publicKey?: string | BrowserBuffer
       }
       | {
         type: KeypairType;
-        publicKey: string | Buffer
+        publicKey: string | BrowserBuffer
       }
   );
 
   readonly type: KeypairType;
   publicKey(): string;
   secret(): string;
-  rawPublicKey(): Buffer;
-  rawSecretKey(): Buffer;
+  rawPublicKey(): BrowserBuffer;
+  rawSecretKey(): BrowserBuffer;
   canSign(): boolean;
-  sign(data: Buffer): Buffer;
-  signDecorated(data: Buffer): xdr.DecoratedSignature;
-  signPayloadDecorated(data: Buffer): xdr.DecoratedSignature;
-  signatureHint(): Buffer;
-  verify(data: Buffer, signature: Buffer): boolean;
+  sign(data: BrowserBuffer): BrowserBuffer;
+  signDecorated(data: BrowserBuffer): xdr.DecoratedSignature;
+  signPayloadDecorated(data: BrowserBuffer): xdr.DecoratedSignature;
+  signatureHint(): BrowserBuffer;
+  verify(data: BrowserBuffer, signature: BrowserBuffer): boolean;
 
   xdrAccountId(): xdr.AccountId;
   xdrPublicKey(): xdr.PublicKey;
@@ -147,7 +148,7 @@ export class Keypair {
 
 export const LiquidityPoolFeeV18 = 30;
 
-export function getLiquidityPoolId(liquidityPoolType: LiquidityPoolType, liquidityPoolParameters: LiquidityPoolParameters): Buffer;
+export function getLiquidityPoolId(liquidityPoolType: LiquidityPoolType, liquidityPoolParameters: LiquidityPoolParameters): BrowserBuffer;
 
 export namespace LiquidityPoolParameters {
   interface ConstantProduct {
@@ -183,7 +184,7 @@ export type MemoType =
   | MemoType.Text
   | MemoType.Hash
   | MemoType.Return;
-export type MemoValue = null | string | Buffer;
+export type MemoValue = null | string | BrowserBuffer;
 
 export class Memo<T extends MemoType = MemoType> {
   static fromXDRObject(memo: xdr.Memo): Memo;
@@ -194,7 +195,7 @@ export class Memo<T extends MemoType = MemoType> {
   static text(text: string): Memo<MemoType.Text>;
 
   constructor(type: MemoType.None, value?: null);
-  constructor(type: MemoType.Hash | MemoType.Return, value: Buffer);
+  constructor(type: MemoType.Hash | MemoType.Return, value: BrowserBuffer);
   constructor(
     type: MemoType.Hash | MemoType.Return | MemoType.ID | MemoType.Text,
     value: string
@@ -207,11 +208,11 @@ export class Memo<T extends MemoType = MemoType> {
     : T extends MemoType.ID
     ? string
     : T extends MemoType.Text
-    ? string | Buffer // github.com/stellar/js-stellar-base/issues/152
+    ? string | BrowserBuffer // github.com/stellar/js-stellar-base/issues/152
     : T extends MemoType.Hash
-    ? Buffer
+    ? BrowserBuffer
     : T extends MemoType.Return
-    ? Buffer
+    ? BrowserBuffer
     : MemoValue;
 
   toXDRObject(): xdr.Memo;
@@ -254,11 +255,11 @@ export namespace Signer {
     weight: number | undefined;
   }
   interface Sha256Hash {
-    sha256Hash: Buffer;
+    sha256Hash: BrowserBuffer;
     weight: number | undefined;
   }
   interface PreAuthTx {
-    preAuthTx: Buffer;
+    preAuthTx: BrowserBuffer;
     weight: number | undefined;
   }
   interface Ed25519SignedPayload {
@@ -271,10 +272,10 @@ export namespace SignerKeyOptions {
     ed25519PublicKey: string;
   }
   interface Sha256Hash {
-    sha256Hash: Buffer | string;
+    sha256Hash: BrowserBuffer | string;
   }
   interface PreAuthTx {
-    preAuthTx: Buffer | string;
+    preAuthTx: BrowserBuffer | string;
   }
   interface Ed25519SignedPayload {
     ed25519SignedPayload: string;
@@ -298,11 +299,11 @@ export namespace SignerOptions {
     weight?: number | string;
   }
   interface Sha256Hash {
-    sha256Hash: Buffer | string;
+    sha256Hash: BrowserBuffer | string;
     weight?: number | string;
   }
   interface PreAuthTx {
-    preAuthTx: Buffer | string;
+    preAuthTx: BrowserBuffer | string;
     weight?: number | string;
   }
   interface Ed25519SignedPayload {
@@ -410,7 +411,7 @@ export namespace OperationOptions {
   }
   interface ManageData extends BaseOptions {
     name: string;
-    value: string | Buffer | null;
+    value: string | BrowserBuffer | null;
   }
   interface PathPaymentStrictReceive extends BaseOptions {
     sendAsset: Asset;
@@ -602,7 +603,7 @@ export namespace Operation {
 
   interface ManageData extends BaseOperation<OperationType.ManageData> {
     name: string;
-    value?: Buffer;
+    value?: BrowserBuffer;
   }
   function manageData(
     options: OperationOptions.ManageData
@@ -862,27 +863,27 @@ export type Operation =
   | Operation.LiquidityPoolWithdraw;
 
 export namespace StrKey {
-  function encodeEd25519PublicKey(data: Buffer): string;
-  function decodeEd25519PublicKey(address: string): Buffer;
+  function encodeEd25519PublicKey(data: BrowserBuffer): string;
+  function decodeEd25519PublicKey(address: string): BrowserBuffer;
   function isValidEd25519PublicKey(Key: string): boolean;
 
-  function encodeEd25519SecretSeed(data: Buffer): string;
-  function decodeEd25519SecretSeed(address: string): Buffer;
+  function encodeEd25519SecretSeed(data: BrowserBuffer): string;
+  function decodeEd25519SecretSeed(address: string): BrowserBuffer;
   function isValidEd25519SecretSeed(seed: string): boolean;
 
-  function encodeMed25519PublicKey(data: Buffer): string;
-  function decodeMed25519PublicKey(address: string): Buffer;
+  function encodeMed25519PublicKey(data: BrowserBuffer): string;
+  function decodeMed25519PublicKey(address: string): BrowserBuffer;
   function isValidMed25519PublicKey(publicKey: string): boolean;
 
-  function encodeSignedPayload(data: Buffer): string;
-  function decodeSignedPayload(address: string): Buffer;
+  function encodeSignedPayload(data: BrowserBuffer): string;
+  function decodeSignedPayload(address: string): BrowserBuffer;
   function isValidSignedPayload(address: string): boolean;
 
-  function encodePreAuthTx(data: Buffer): string;
-  function decodePreAuthTx(address: string): Buffer;
+  function encodePreAuthTx(data: BrowserBuffer): string;
+  function decodePreAuthTx(address: string): BrowserBuffer;
 
-  function encodeSha256Hash(data: Buffer): string;
-  function decodeSha256Hash(address: string): Buffer;
+  function encodeSha256Hash(data: BrowserBuffer): string;
+  function decodeSha256Hash(address: string): BrowserBuffer;
 }
 
 export namespace SignerKey {
@@ -896,12 +897,12 @@ export class TransactionI {
 
   fee: string;
   getKeypairSignature(keypair: Keypair): string;
-  hash(): Buffer;
+  hash(): BrowserBuffer;
   networkPassphrase: string;
   sign(...keypairs: Keypair[]): void;
-  signatureBase(): Buffer;
+  signatureBase(): BrowserBuffer;
   signatures: xdr.DecoratedSignature[];
-  signHashX(preimage: Buffer | string): void;
+  signHashX(preimage: BrowserBuffer | string): void;
   toEnvelope(): xdr.TransactionEnvelope;
   toXDR(): string;
 }
@@ -995,12 +996,12 @@ export namespace TransactionBuilder {
   }
 }
 
-export function hash(data: Buffer): Buffer;
-export function sign(data: Buffer, rawSecret: Buffer): Buffer;
+export function hash(data: BrowserBuffer): BrowserBuffer;
+export function sign(data: BrowserBuffer, rawSecret: BrowserBuffer): BrowserBuffer;
 export function verify(
-  data: Buffer,
-  signature: Buffer,
-  rawPublicKey: Buffer
+  data: BrowserBuffer,
+  signature: BrowserBuffer,
+  rawPublicKey: BrowserBuffer
 ): boolean;
 
 export function decodeAddressToMuxedAccount(address: string, supportMuxing: boolean): xdr.MuxedAccount;

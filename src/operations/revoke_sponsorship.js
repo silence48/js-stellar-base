@@ -276,26 +276,26 @@ export function revokeSignerSponsorship(opts = {}) {
   } else if (opts.signer.preAuthTx) {
     let buffer;
     if (isString(opts.signer.preAuthTx)) {
-      buffer = Buffer.from(opts.signer.preAuthTx, 'hex');
+      buffer = BrowserBuffer.from(opts.signer.preAuthTx, 'hex');
     } else {
       buffer = opts.signer.preAuthTx;
     }
 
-    if (!(Buffer.isBuffer(buffer) && buffer.length === 32)) {
-      throw new Error('signer.preAuthTx must be 32 bytes Buffer.');
+    if (!(BrowserBuffer.isBuffer(buffer) && buffer.length === 32)) {
+      throw new Error('signer.preAuthTx must be 32 bytes BrowserBuffer.');
     }
 
     key = new xdr.SignerKey.signerKeyTypePreAuthTx(buffer);
   } else if (opts.signer.sha256Hash) {
     let buffer;
     if (isString(opts.signer.sha256Hash)) {
-      buffer = Buffer.from(opts.signer.sha256Hash, 'hex');
+      buffer = BrowserBuffer.from(opts.signer.sha256Hash, 'hex');
     } else {
       buffer = opts.signer.sha256Hash;
     }
 
-    if (!(Buffer.isBuffer(buffer) && buffer.length === 32)) {
-      throw new Error('signer.sha256Hash must be 32 bytes Buffer.');
+    if (!(BrowserBuffer.isBuffer(buffer) && buffer.length === 32)) {
+      throw new Error('signer.sha256Hash must be 32 bytes BrowserBuffer.');
     }
 
     key = new xdr.SignerKey.signerKeyTypeHashX(buffer);

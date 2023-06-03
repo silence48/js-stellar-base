@@ -1,3 +1,5 @@
+import BrowserBuffer from "../../src/util/BrowserBuffer";
+
 describe('StrKey', function () {
   beforeEach(function () {
     var keypair = StellarBase.Keypair.master(
@@ -228,7 +230,7 @@ describe('StrKey', function () {
   const PUBKEY = 'GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ';
   const MPUBKEY =
     'MA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVAAAAAAAAAAAAAJLK';
-  const RAW_MPUBKEY = Buffer.from(
+  const RAW_MPUBKEY = BrowserBuffer.from(
     '3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a8000000000000000',
     'hex'
   );
@@ -362,7 +364,7 @@ describe('StrKey', function () {
         ed25519: StellarBase.StrKey.decodeEd25519PublicKey(
           'GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ'
         ),
-        payload: Buffer.alloc(0)
+        payload: BrowserBuffer.alloc(0)
       });
       const isValid = (sp) => {
         return StellarBase.StrKey.isValidSignedPayload(
@@ -371,22 +373,22 @@ describe('StrKey', function () {
       };
 
       it('invalid with no payload', function () {
-        sp.payload(Buffer.alloc(0));
+        sp.payload(BrowserBuffer.alloc(0));
         expect(isValid(sp)).to.be.false;
       });
 
       it('valid with 1-byte payload', function () {
-        sp.payload(Buffer.alloc(1));
+        sp.payload(BrowserBuffer.alloc(1));
         expect(isValid(sp)).to.be.true;
       });
 
       it('throws with 65-byte payload', function () {
-        sp.payload(Buffer.alloc(65));
+        sp.payload(BrowserBuffer.alloc(65));
         expect(() => isValid(sp)).to.throw(/XDR Write Error/);
       });
 
       it('valid with 64-byte payload (max)', function () {
-        sp.payload(Buffer.alloc(64));
+        sp.payload(BrowserBuffer.alloc(64));
         expect(isValid(sp)).to.be.true;
       });
     });

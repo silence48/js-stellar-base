@@ -1,9 +1,9 @@
 import xdr from './xdr';
 import { hash } from './hashing';
-import { base64ToUint8Array } from './util/BrowserBuffer';
 import { Transaction } from './transaction';
 import { TransactionBase } from './transaction_base';
 import { encodeMuxedAccountToAddress } from './util/decode_encode_muxed_account';
+import BrowserBuffer from './util/BrowserBuffer';
 
 /**
  * Use {@link TransactionBuilder.buildFeeBumpTransaction} to build a
@@ -24,7 +24,7 @@ import { encodeMuxedAccountToAddress } from './util/decode_encode_muxed_account'
 export class FeeBumpTransaction extends TransactionBase {
   constructor(envelope, networkPassphrase) {
     if (typeof envelope === 'string') {
-      const buffer = base64ToUint8Array(envelope);
+      const buffer = BrowserBuffer.from(envelope, 'base64');
       envelope = xdr.TransactionEnvelope.fromXDR(buffer);
     }
 

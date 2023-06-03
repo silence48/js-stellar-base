@@ -4,6 +4,7 @@ import clone from 'lodash/clone';
 import { UnsignedHyper } from 'js-xdr';
 import BigNumber from 'bignumber.js';
 import xdr from './xdr';
+import BrowserBuffer from './util/BrowserBuffer';
 
 /**
  * Type of {@link Memo}.
@@ -51,9 +52,9 @@ export class Memo {
       case MemoHash:
       case MemoReturn:
         Memo._validateHashValue(value);
-        // We want MemoHash and MemoReturn to have Buffer as a value
+        // We want MemoHash and MemoReturn to have BrowserBuffer as a value
         if (isString(value)) {
-          this._value = Buffer.from(value, 'hex');
+          this._value = BrowserBuffer.from(value, 'hex');
         }
         break;
       default:
@@ -88,7 +89,7 @@ export class Memo {
         return clone(this._value);
       case MemoHash:
       case MemoReturn:
-        return Buffer.from(this._value);
+        return BrowserBuffer.from(this._value);
       default:
         throw new Error('Invalid memo type');
     }
@@ -143,9 +144,9 @@ export class Memo {
       if (!/^[0-9A-Fa-f]{64}$/g.test(value)) {
         throw error;
       }
-      valueBuffer = Buffer.from(value, 'hex');
-    } else if (Buffer.isBuffer(value)) {
-      valueBuffer = Buffer.from(value);
+      valueBuffer = BrowserBuffer.from(value, 'hex');
+    } else if (BrowserBuffer.isBuffer(value)) {
+      valueBuffer = BrowserBuffer.from(value);
     } else {
       throw error;
     }

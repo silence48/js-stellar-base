@@ -4,14 +4,14 @@ import nacl from 'tweetnacl';
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
 
-import {concatArrayTypedArrays, Uint8equals, Uint8ArrayAlloc} from './utils/BrowserBuffer'
+import BrowserBuffer, {concatArrayTypedArrays, Uint8equals, Uint8ArrayAlloc} from './utils/BrowserBuffer'
 
 import { sign, verify, generate } from './signing';
 import { StrKey } from './strkey';
 import { hash } from './hashing';
 
 import xdr from './xdr';
-import {  } from './util/BrowserBuffer';
+
 
 /**
  * `Keypair` represents public (and secret) keys of the account.
@@ -40,7 +40,7 @@ export class Keypair {
 
     if (keys.secretKey) {
       //probably should make a copy here...
-      keys.secretKey = Uint8Array.from(keys.secretKey);
+      keys.secretKey = BrowserBuffer.from(keys.secretKey);
 
       if (keys.secretKey.length !== 32) {
         throw new Error('secretKey length is invalid');
@@ -52,12 +52,12 @@ export class Keypair {
 
       if (
         keys.publicKey &&
-        !Uint8equals(this._publicKey, Uint8Array.from(keys.publicKey))
+        !this._publicKey.equals(BrowserBuffer.from(keys.publicKey))
       ) {
         throw new Error('secretKey does not match publicKey');
       }
     } else {
-      this._publicKey = Uint8Array.from(keys.publicKey);
+      this._publicKey = BrowserBuffer.from(keys.publicKey);
 
       if (this._publicKey.length !== 32) {
         throw new Error('publicKey length is invalid');
@@ -268,10 +268,10 @@ export class Keypair {
     const signature = this.sign(data);
     const keyHint = this.signatureHint();
 
-    let hint = Uint8Array.from(data.slice(-4));
+    let hint = BrowserBuffer.from(data.slice(-4));
     if (hint.length < 4) {
       // append zeroes as needed
-      hint = concatArrayTypedArrays([hint, Uint8ArrayAlloc(4 - data.length, 0)]);
+      hint =  hint = BrowserBuffer.concat([hint, BrowserBuffer.alloc(4 - data.length, 0)]);
     }
 
     return new xdr.DecoratedSignature({

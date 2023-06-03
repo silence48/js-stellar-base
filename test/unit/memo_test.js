@@ -1,3 +1,5 @@
+import BrowserBuffer from "../../src/util/BrowserBuffer";
+
 describe('Memo.constructor()', function () {
   it('throws error when type is invalid', function () {
     expect(() => new StellarBase.Memo('test')).to.throw(/Invalid memo type/);
@@ -20,14 +22,14 @@ describe('Memo.text()', function () {
     expect(() => StellarBase.Memo.text('test')).to.not.throw();
     let memoUtf8 = StellarBase.Memo.text('三代之時');
 
-    let a = Buffer.from(memoUtf8.toXDRObject().value(), 'utf8');
-    let b = Buffer.from('三代之時', 'utf8');
+    let a = BrowserBuffer.from(memoUtf8.toXDRObject().value(), 'utf8');
+    let b = BrowserBuffer.from('三代之時', 'utf8');
     expect(a).to.be.deep.equal(b);
   });
 
   it('returns a value for a correct argument (utf8)', function () {
     let memoText = StellarBase.Memo.text([0xd1]).toXDRObject().toXDR();
-    let expected = Buffer.from([
+    let expected = BrowserBuffer.from([
       // memo_text
       0x00, 0x00, 0x00, 0x01,
       // length
@@ -37,7 +39,7 @@ describe('Memo.text()', function () {
     ]);
     expect(memoText.equals(expected)).to.be.true;
 
-    memoText = StellarBase.Memo.text(Buffer.from([0xd1]))
+    memoText = StellarBase.Memo.text(BrowserBuffer.from([0xd1]))
       .toXDRObject()
       .toXDR();
     expect(memoText.equals(expected)).to.be.true;
@@ -67,7 +69,7 @@ describe('Memo.text()', function () {
   });
 
   it('converts to/from xdr object (buffer)', function () {
-    let buf = Buffer.from([0xd1]);
+    let buf = BrowserBuffer.from([0xd1]);
     let memo = StellarBase.Memo.text(buf).toXDRObject();
     expect(memo.arm()).to.equal('text');
 
@@ -134,7 +136,7 @@ describe('Memo.id()', function () {
 
 describe('Memo.hash() & Memo.return()', function () {
   it('hash converts to/from xdr object', function () {
-    let buffer = Buffer.alloc(32, 10);
+    let buffer = BrowserBuffer.alloc(32, 10);
 
     let memo = StellarBase.Memo.hash(buffer).toXDRObject();
     expect(memo.arm()).to.equal('hash');
@@ -148,7 +150,7 @@ describe('Memo.hash() & Memo.return()', function () {
   });
 
   it('return converts to/from xdr object', function () {
-    let buffer = Buffer.alloc(32, 10);
+    let buffer = BrowserBuffer.alloc(32, 10);
 
     // Testing string hash
     let memo = StellarBase.Memo.return(buffer.toString('hex')).toXDRObject();
@@ -158,7 +160,7 @@ describe('Memo.hash() & Memo.return()', function () {
 
     let baseMemo = StellarBase.Memo.fromXDRObject(memo);
     expect(baseMemo.type).to.be.equal(StellarBase.MemoReturn);
-    expect(Buffer.isBuffer(baseMemo.value)).to.be.true;
+    expect(BrowserBuffer.isBuffer(baseMemo.value)).to.be.true;
     expect(baseMemo.value.length).to.equal(32);
     expect(baseMemo.value.toString('hex')).to.be.equal(buffer.toString('hex'));
   });
@@ -168,7 +170,7 @@ describe('Memo.hash() & Memo.return()', function () {
   it('returns a value for a correct argument', function () {
     for (let i in methods) {
       let method = methods[i];
-      expect(() => method(Buffer.alloc(32))).to.not.throw();
+      expect(() => method(BrowserBuffer.alloc(32))).to.not.throw();
       expect(() =>
         method(
           '0000000000000000000000000000000000000000000000000000000000000000'
@@ -188,7 +190,7 @@ describe('Memo.hash() & Memo.return()', function () {
       expect(() => method([0, 10, 20])).to.throw(
         /Expects a 32 byte hash value/
       );
-      expect(() => method(Buffer.alloc(33))).to.throw(
+      expect(() => method(BrowserBuffer.alloc(33))).to.throw(
         /Expects a 32 byte hash value/
       );
       expect(() =>

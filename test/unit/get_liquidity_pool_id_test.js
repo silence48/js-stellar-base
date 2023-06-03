@@ -1,3 +1,5 @@
+import BrowserBuffer from "../../src/util/BrowserBuffer";
+
 const assetA = new StellarBase.Asset(
   'ARST',
   'GB7TAYRUZGE6TVT7NHP5SMIZRNQA6PLM423EYISAOAP3MKYIQMVYP2JO'
@@ -83,13 +85,13 @@ describe('StellarBase#getLiquidityPoolId()', function () {
 describe('StellarBase#getLiquidityPoolId() mirror stellar-core getPoolID() tests', function () {
   // The tests below were copied from https://github.com/stellar/stellar-core/blob/c5f6349b240818f716617ca6e0f08d295a6fad9a/src/transactions/test/LiquidityPoolTradeTests.cpp#L430-L526
   const issuer1 = StellarBase.StrKey.encodeEd25519PublicKey(
-    Buffer.from(
+    BrowserBuffer.from(
       '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
       'hex'
     )
   );
   const issuer2 = StellarBase.StrKey.encodeEd25519PublicKey(
-    Buffer.from(
+    BrowserBuffer.from(
       'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789',
       'hex'
     )

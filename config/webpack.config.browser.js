@@ -18,6 +18,9 @@ const config = {
       stream: require.resolve('stream-browserify'),
       buffer: require.resolve('buffer')
     },
+    alias: {
+      Buffer: path.resolve(__dirname, '../src/util/BrowserBuffer.js')
+    },
     extensions: ['.ts', '.js']
   },
   output: {
