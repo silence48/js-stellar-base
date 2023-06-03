@@ -2,8 +2,7 @@
 .nyc_output/
 /node_modules/
 /tmp/
-/dist/
-/config/dist/
+
 /coverage/
 /jsdoc/
 .DS_Store
