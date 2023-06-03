@@ -61,6 +61,7 @@ export class StrKey {
    * @returns {boolean}
    */
   static isValidEd25519PublicKey(publicKey) {
+    console.log(publicKey, 'publicKey in isvalidEd25519PublicKey')
     return isValid('ed25519PublicKey', publicKey);
   }
 
@@ -200,6 +201,7 @@ export class StrKey {
  *     and (c) output length.
  */
 function isValid(versionByteName, encoded) {
+  console.log(encoded, 'encoded in isValid')
   if (!isString(encoded)) {
     return false;
   }

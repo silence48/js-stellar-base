@@ -4,7 +4,7 @@ import { StrKey } from '../strkey';
 import { Keypair } from '../keypair';
 import { Asset } from '../asset';
 import { LiquidityPoolId } from '../liquidity_pool_id';
-
+import BrowserBuffer from '../util/BrowserBuffer';
 /**
  * Create a "revoke sponsorship" operation for an account.
  *

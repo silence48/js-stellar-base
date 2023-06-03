@@ -1,23 +1,31 @@
-export default class BrowserBuffer {
-    constructor(input: string | ArrayBuffer | number | ArrayLike<number> | Iterable<number>, encodingOrOffset?: string | number | ((v: number, k: number) => number), length?: number);
-    
-    static of(...items: number[]): BrowserBuffer;
-    
-    static from(input: ArrayLike<number> | Iterable<number> | string | ArrayBuffer, encodingOrOffset?: string | number, length?: number): BrowserBuffer;
-    
+declare class BrowserBuffer {
+    constructor(input: number | string | object, encodingOrOffset?: string | number, length?: number);
+  
+    static of(...items: any[]): BrowserBuffer;
+    static from(input: string | object, encodingOrOffset?: string | Function, length?: number): BrowserBuffer;
     static alloc(size: number, fill?: number | string): BrowserBuffer;
-    
-    static concat(list: (BrowserBuffer | Uint8Array)[], totalLength?: number): BrowserBuffer;
-    
-    static decode(string: string, encoding: 'utf8' | 'base64' | 'hex'): Uint8Array;
-    
+    static concat(list: BrowserBuffer[], totalLength?: number): BrowserBuffer;
+    static decode(string: string, encoding: string): BrowserBuffer;
+    static decodeBase64(string: string): BrowserBuffer;
+    static decodeHex(string: string): BrowserBuffer;
     static isBuffer(obj: any): boolean;
+  
+    length: number;
+    data: Uint8Array;
+  
+    toString(encoding?: string): string;
+    toHex(): string;
+    toBase64(): string;
+  
+    equals(otherBuffer: BrowserBuffer): boolean;
+    slice(start?: number, end?: number): BrowserBuffer;
+    copy(targetBuffer: BrowserBuffer, targetStart?: number, sourceStart?: number, sourceEnd?: number): number;
+    compare(otherBuffer: BrowserBuffer, targetStart?: number, targetEnd?: number, sourceStart?: number, sourceEnd?: number): number;
+    fill(value: any, offset?: number, end?: number, encoding?: string): this;
+    indexOf(value: string | number | Uint8Array | BrowserBuffer, byteOffset?: number, encoding?: string): number;
+    lastIndexOf(value: string | number | Uint8Array | BrowserBuffer, byteOffset?: number, encoding?: string): number;
     
-    toString(encoding: 'utf8' | 'ascii' | 'base64' | 'hex'): string;
   }
   
-  //export = BrowserBuffer;
-
-
-
+  export default BrowserBuffer;
   

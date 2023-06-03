@@ -1,4 +1,4 @@
-import BrowserBuffer, {Uint8ArrayAlloc, concatArrayTypedArrays} from './utils/BrowserBuffer'
+import BrowserBuffer from './util/BrowserBuffer'
 //  This module provides the signing functionality used by the stellar network
 //  The code below may look a little strange... this is because we try to provide
 //  the most efficient signing method possible.  First, we try to load the

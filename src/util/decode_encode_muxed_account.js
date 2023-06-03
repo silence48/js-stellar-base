@@ -2,7 +2,7 @@ import isString from 'lodash/isString';
 
 import xdr from '../xdr';
 import { StrKey } from '../strkey';
-
+import BrowserBuffer from './BrowserBuffer';
 /**
  * Converts a Stellar address (in G... or M... form) to an `xdr.MuxedAccount`
  * structure, using the ed25519 representation when possible.

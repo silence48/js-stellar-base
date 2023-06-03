@@ -27,7 +27,9 @@ export class Asset {
       throw new Error('Issuer cannot be null');
     }
     if (issuer && !StrKey.isValidEd25519PublicKey(issuer)) {
-      throw new Error('Issuer is invalid');
+      console.log(!StrKey.isValidEd25519PublicKey(issuer), '!StrKey.isValidEd25519PublicKey(issuer)')
+      console.log(StrKey.isValidEd25519PublicKey(issuer), 'without !')
+      throw new Error(`Issuer is invalid ${issuer}`);
     }
 
     if (String(code).toLowerCase() === 'xlm') {
@@ -261,7 +263,7 @@ export class Asset {
 function asciiCompare(a, b) {
   const len = Math.min(a.length, b.length);
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < len; i += 1) {
     const diff = a.charCodeAt(i) - b.charCodeAt(i);
     if (diff !== 0) {
       return diff < 0 ? -1 : 1;
@@ -270,7 +272,6 @@ function asciiCompare(a, b) {
 
   if (a.length === b.length) {
     return 0;
-  } else {
-    return a.length < b.length ? -1 : 1;
   }
+  return a.length < b.length ? -1 : 1;
 }

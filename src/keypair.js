@@ -4,7 +4,7 @@ import nacl from 'tweetnacl';
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
 
-import BrowserBuffer, {concatArrayTypedArrays, Uint8equals, Uint8ArrayAlloc} from './utils/BrowserBuffer'
+import BrowserBuffer from  './util/BrowserBuffer'
 
 import { sign, verify, generate } from './signing';
 import { StrKey } from './strkey';
@@ -39,7 +39,7 @@ export class Keypair {
     this.type = keys.type;
 
     if (keys.secretKey) {
-      //probably should make a copy here...
+      // Probably should make a copy here...
       keys.secretKey = BrowserBuffer.from(keys.secretKey);
 
       if (keys.secretKey.length !== 32) {
@@ -48,7 +48,7 @@ export class Keypair {
 
       this._secretSeed = keys.secretKey;
       this._publicKey = generate(keys.secretKey);
-      this._secretKey = concatArrayTypedArrays([keys.secretKey, this._publicKey]);
+      this._secretKey = BrowserBuffer.concat([keys.secretKey, this._publicKey]);
 
       if (
         keys.publicKey &&
@@ -271,7 +271,7 @@ export class Keypair {
     let hint = BrowserBuffer.from(data.slice(-4));
     if (hint.length < 4) {
       // append zeroes as needed
-      hint =  hint = BrowserBuffer.concat([hint, BrowserBuffer.alloc(4 - data.length, 0)]);
+      hint = BrowserBuffer.concat([hint, BrowserBuffer.alloc(4 - data.length, 0)]);
     }
 
     return new xdr.DecoratedSignature({
