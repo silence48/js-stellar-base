@@ -19,13 +19,16 @@ module.exports = {
     'no-use-before-define': 0,
     'prefer-destructuring': 0,
     'lines-between-class-members': 0,
-
+    'no-bitwise': 0,
     // WARN
     'prefer-import/prefer-import-over-require': [1],
-    'no-console': ['warn', { allow: ['assert'] }],
+    //'no-console': ['warn', { allow: ['assert'] }],
+    'no-console': 0,
     'no-debugger': 1,
     'no-unused-vars': 1,
     'arrow-body-style': 1,
+    'prefer-template': 0,
+    'no-plusplus': 1,
     'valid-jsdoc': [
       1,
       {
@@ -33,7 +36,7 @@ module.exports = {
       }
     ],
     'prefer-const': 1,
-    'object-shorthand': 1,
+    'object-shorthand': 0,
     'require-await': 1,
 
     // ERROR

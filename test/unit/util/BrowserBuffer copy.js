@@ -11,66 +11,23 @@ class BrowserBuffer {
       }
     } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
       this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input);
     } else {
       throw new Error('Unsupported data type');
     }
   }
-  /*
-  constructor(input, encodingOrOffset, length) {
-    if (typeof input === 'number') {
-      this.data = new Uint8Array(input);
-      this.data.fill(0);
-    } else if (typeof input === 'string') {
-      if (typeof encodingOrOffset === 'string') {
-        this.data = BrowserBuffer.decode(input, encodingOrOffset);
-      } else {
-        this.data = new TextEncoder().encode(input);
-      }
-    } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
-      this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
-    } else {
-      throw new Error('Unsupported data type');
-    }
-  }
-  
-  constructor(input, encodingOrOffset, length) {
-    console.log('trying to make a browserbuffer', input, encodingOrOffset, length)
-    console.log(`typeof input: ${typeof input}`)
-    console.log(`type of data is ${typeof input.data}`)
-    if (typeof input === 'number') {
-      this.data = new Uint8Array(input);
-      this.data.fill(0);
-    } else if (typeof input === 'string') {
-      if (typeof encodingOrOffset === 'string') {
-        this.data = BrowserBuffer.decode(input, encodingOrOffset);
-      } else {
-        this.data = new TextEncoder().encode(input);
-      }
-    } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
-      this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
-    } else {
-      throw new Error('Unsupported data type');
-    }
-  }
-*/
 
   static of(...items) {
     return new BrowserBuffer(items);
   }
-
   static from(input, encodingOrOffset, length) {
-    console.log('trying to make a browserbuffer', input, encodingOrOffset, length)
     if (typeof input === 'string') {
-      return new BrowserBuffer(input, encodingOrOffset);
+      if (typeof encodingOrOffset === 'string') {
+        return new BrowserBuffer(BrowserBuffer.decode(input, encodingOrOffset));
+      }
+      return new BrowserBuffer(new TextEncoder().encode(input));
     }
   
-    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
+    if (typeof input === 'object' && (Array.isArray(input) || ArrayBuffer.isView(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
       if (typeof encodingOrOffset === 'function') {
         const mapfn = encodingOrOffset;
         const arrayLike = Array.from(input, mapfn);
@@ -81,16 +38,35 @@ class BrowserBuffer {
   
     throw new Error('Unsupported data type');
   }
+ /*
+  static from(input, encodingOrOffset, length) {
+    if (Buffer.isBuffer(input)) {
+      return new BrowserBuffer(input.buffer, encodingOrOffset, length);
+    }
 
-  static isBuffer(obj) {
-    return obj instanceof BrowserBuffer || obj instanceof Uint8Array || BrowserBuffer.isNodeBuffer(obj);
+    if (typeof input === 'string') {
+      if (typeof encodingOrOffset === 'string') {
+        return new BrowserBuffer(BrowserBuffer.decode(input, encodingOrOffset));
+      }
+      return new BrowserBuffer(new TextEncoder().encode(input));
+    }
+
+    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
+      if (typeof encodingOrOffset === 'function') {
+        const mapfn = encodingOrOffset;
+        const arrayLike = Array.from(input, mapfn);
+        return new BrowserBuffer(arrayLike);
+      }
+      return new BrowserBuffer(input, encodingOrOffset, length);
+    }
+
+    throw new Error('Unsupported data type');
   }
 
-  static isNodeBuffer(obj) {
-    return typeof obj === 'object' &&
-      typeof obj.constructor === 'function' &&
-      typeof obj.constructor.isBuffer === 'function' &&
-      obj.constructor.isBuffer(obj);
+*/
+  static isBuffer(obj) {
+    console.log('isBuffer, ', typeof obj, obj)
+    return obj instanceof BrowserBuffer || obj instanceof Uint8Array;
   }
 
   static alloc(size, fill = 0) {
@@ -98,20 +74,18 @@ class BrowserBuffer {
     if (typeof fill === 'string') {
       const fillBuffer = BrowserBuffer.from(fill, 'utf8');
       for (let i = 0; i < buffer.length; i += 1) {
-        buffer[i] = fillBuffer[i % fillBuffer.length];
+        buffer.data[i] = fillBuffer.data[i % fillBuffer.length];
       }
     } else {
-      buffer.fill(fill);
+      buffer.data.fill(fill);
     }
     return buffer;
   }
 
   fill(value, offset = 0, end = this.data.length, encoding = 'utf8') {
-    console.log('filling a buffer with', value, offset, end, encoding)
     const fillBuffer = BrowserBuffer.from(value, encoding);
     for (let i = offset; i < end; i += 1) {
-      console.log('im filling a buffer with', fillBuffer[i % fillBuffer.length])
-      this[i] = fillBuffer[i];
+      this.data[i] = fillBuffer.data[i % fillBuffer.length];
     }
     return this;
   }
@@ -132,8 +106,6 @@ class BrowserBuffer {
   static decode(string, encoding) {
     switch (encoding) {
       case 'utf8':
-        return new TextEncoder().encode(string);
-      case 'ascii':
         return new TextEncoder().encode(string);
       case 'base64':
         return this.decodeBase64(string);
@@ -171,15 +143,16 @@ class BrowserBuffer {
       case 'hex':
         return this.toHex();
       case 'utf8':
-        return new TextDecoder().decode(this);
+        return new TextDecoder().decode(this.data.buffer);
       case 'ascii': // Treat 'ascii' encoding the same as 'utf8'
-        return new TextDecoder().decode(this);
+        return new TextDecoder().decode(this.data.buffer);
       case 'base64':
         return this.toBase64();
       default:
         throw new Error('Unsupported encoding type');
     }
   }
+  
 
   equals(otherBuffer) {
     if (!(otherBuffer instanceof BrowserBuffer)) {
@@ -254,10 +227,9 @@ class BrowserBuffer {
     }
     return btoa(binary);
   }
-
   writeUInt16LE(value, offset = 0) {
-    this[offset] = value & 0xff;
-    this[offset + 1] = (value >> 8) & 0xff;
+    this.data[offset] = value & 0xff;
+    this.data[offset + 1] = (value >> 8) & 0xff;
   }
 }
 

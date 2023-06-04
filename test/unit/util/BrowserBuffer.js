@@ -65,12 +65,15 @@ class BrowserBuffer {
   }
 
   static from(input, encodingOrOffset, length) {
-    console.log('trying to make a browserbuffer', input, encodingOrOffset, length)
     if (typeof input === 'string') {
       return new BrowserBuffer(input, encodingOrOffset);
     }
   
-    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
+    if (BrowserBuffer.isBuffer(input)) {
+      return new BrowserBuffer(input);
+    }
+  
+    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer)) {
       if (typeof encodingOrOffset === 'function') {
         const mapfn = encodingOrOffset;
         const arrayLike = Array.from(input, mapfn);
@@ -98,20 +101,18 @@ class BrowserBuffer {
     if (typeof fill === 'string') {
       const fillBuffer = BrowserBuffer.from(fill, 'utf8');
       for (let i = 0; i < buffer.length; i += 1) {
-        buffer[i] = fillBuffer[i % fillBuffer.length];
+        buffer.data[i] = fillBuffer.data[i % fillBuffer.length];
       }
     } else {
-      buffer.fill(fill);
+      buffer.data.fill(fill);
     }
     return buffer;
   }
 
   fill(value, offset = 0, end = this.data.length, encoding = 'utf8') {
-    console.log('filling a buffer with', value, offset, end, encoding)
     const fillBuffer = BrowserBuffer.from(value, encoding);
     for (let i = offset; i < end; i += 1) {
-      console.log('im filling a buffer with', fillBuffer[i % fillBuffer.length])
-      this[i] = fillBuffer[i];
+      this.data[i] = fillBuffer[i % fillBuffer.length];
     }
     return this;
   }
@@ -171,9 +172,9 @@ class BrowserBuffer {
       case 'hex':
         return this.toHex();
       case 'utf8':
-        return new TextDecoder().decode(this);
+        return new TextDecoder().decode(this.data.buffer);
       case 'ascii': // Treat 'ascii' encoding the same as 'utf8'
-        return new TextDecoder().decode(this);
+        return new TextDecoder().decode(this.data.buffer);
       case 'base64':
         return this.toBase64();
       default:
@@ -194,7 +195,7 @@ class BrowserBuffer {
 
   copy(targetBuffer, targetStart = 0, sourceStart = 0, sourceEnd = this.data.length) {
     const sourceData = this.data.slice(sourceStart, sourceEnd);
-    targetBuffer.data.set(sourceData, targetStart);
+    targetBuffer.set(sourceData, targetStart);
     return sourceData.length;
   }
 
@@ -240,7 +241,7 @@ class BrowserBuffer {
   toHex() {
     let hex = '';
     for (let i = 0; i < this.length; i += 1) {
-      const part = this[i].toString(16);
+      const part = this.data[i].toString(16);
       hex += part.length < 2 ? `0${part}` : part;
     }
     return hex;
@@ -248,16 +249,16 @@ class BrowserBuffer {
 
   toBase64() {
     let binary = '';
-    const len = this.byteLength;
+    const len = this.data.byteLength;
     for (let i = 0; i < len; i += 1) {
-      binary += String.fromCharCode(this[i]);
+      binary += String.fromCharCode(this.data[i]);
     }
     return btoa(binary);
   }
 
   writeUInt16LE(value, offset = 0) {
-    this[offset] = value & 0xff;
-    this[offset + 1] = (value >> 8) & 0xff;
+    this.data[offset] = value & 0xff;
+    this.data[offset + 1] = (value >> 8) & 0xff;
   }
 }
 

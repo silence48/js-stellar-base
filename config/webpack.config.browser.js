@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 var ESLintPlugin = require('eslint-webpack-plugin');
 var TerserPlugin = require('terser-webpack-plugin');
-var NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+
 
 const config = {
   target: 'web',
@@ -15,8 +15,6 @@ const config = {
   resolve: {
     fallback: {
       crypto: require.resolve('crypto-browserify'),
-      stream: require.resolve('stream-browserify'),
-      buffer: require.resolve('buffer')
     },
     alias: {
       Buffer: path.resolve(__dirname, '../src/util/BrowserBuffer.js')
@@ -65,10 +63,10 @@ const config = {
     }),
     // Ignore native modules (sodium-native)
     new webpack.IgnorePlugin({ resourceRegExp: /sodium-native/ }),
-    new NodePolyfillPlugin(),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer']
-    })
+    //new NodePolyfillPlugin(),
+    //new webpack.ProvidePlugin({
+      //Buffer: ['buffer', 'Buffer']
+    //})
   ],
   watchOptions: {
     ignored: /(node_modules|coverage|lib|dist)/

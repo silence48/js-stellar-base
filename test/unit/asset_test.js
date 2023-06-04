@@ -1,4 +1,4 @@
-import BrowserBuffer from  '../../src/util/BrowserBuffer';
+import BrowserBuffer from  './util/BrowserBuffer';
 
 describe('Asset', function () {
   describe('constructor', function () {
