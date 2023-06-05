@@ -38,7 +38,7 @@ export class StrKey {
    * @returns {string}        "G..." representation of the key
    */
   static encodeEd25519PublicKey(data) {
-    console.log('data in encodeEd25519PublicKey', data)
+    // console.log('data in encodeEd25519PublicKey', data)
     return encodeCheck('ed25519PublicKey', data);
   }
 
@@ -61,7 +61,7 @@ export class StrKey {
    * @returns {boolean}
    */
   static isValidEd25519PublicKey(publicKey) {
-    console.log(publicKey, 'publicKey in isvalidEd25519PublicKey')
+   // console.log(publicKey, 'publicKey in isvalidEd25519PublicKey')
     return isValid('ed25519PublicKey', publicKey);
   }
 
@@ -201,15 +201,16 @@ export class StrKey {
  *     and (c) output length.
  */
 function isValid(versionByteName, encoded) {
-  console.log(encoded, 'encoded in isValid')
-  console.log(typeof encoded, 'typeof encoded in isValid')
+  // console.log(encoded, 'encoded in isValid')
+  // console.log(JSON.stringify(encoded), 'JSON.stringify(encoded) in isValid');
+  // console.log(typeof encoded, 'typeof encoded in isValid')
   if (!isString(encoded)) {
     return false;
   }
-  console.log(versionByteName, 'versionByteName in isValid')
+  // console.log(versionByteName, 'versionByteName in isValid')
   // basic length checks on the strkey lengths
   switch (versionByteName) {
-    
+
     case 'ed25519PublicKey': // falls through
     case 'ed25519SecretSeed': // falls through
     case 'preAuthTx': // falls through
@@ -238,7 +239,7 @@ function isValid(versionByteName, encoded) {
   let decoded = '';
   try {
     decoded = decodeCheck(versionByteName, encoded);
-    console.log('back from decoded is,', decoded)
+    // console.log('back from decoded is,', decoded)
   } catch (err) {
     console.log('there was an error in decodeCheck, and it is', err)
     return false;
@@ -268,8 +269,8 @@ function isValid(versionByteName, encoded) {
 }
 
 export function decodeCheck(versionByteName, encoded) {
-  console.log(encoded, 'encoded in decodeCheck')
-  console.log(typeof encoded, 'typeof encoded in decodeCheck')
+  // console.log(encoded, 'encoded in decodeCheck')
+  // console.log(typeof encoded, 'typeof encoded in decodeCheck')
 
   if (!isString(encoded)) {
     console.log('the type was invalid in decodeCheck')
@@ -281,18 +282,18 @@ export function decodeCheck(versionByteName, encoded) {
   const payload = decoded.slice(0, -2);
   const data = payload.slice(1);
   const checksum = decoded.slice(-2);
-console.log(decoded, versionByte, payload, data, checksum, 'decoded, versionByte, payload, data, checksum in decodeCheck')
-console.log(`versionByte: ${versionByte}\n versionByteName: ${versionByteName}\n encoded: ${encoded}\n decoded: ${decoded}\n payload: ${payload}\n data: ${data}\n checksum: ${checksum}`)
+  
+  
   if (encoded !== base32.encode(decoded)) {
     console.log('there was an error with base32.encode in decodeCheck')
     throw new Error('invalid encoded string');
   }
 
   const expectedVersion = versionBytes[versionByteName];
-  console.log(expectedVersion, 'expectedVersion in decodeCheck')
+  
   if (isUndefined(expectedVersion)) {
-    let err =  `${versionByteName} is not a valid version byte name. ` +
-    `Expected one of ${Object.keys(versionBytes).join(', ')}`;
+    let err = `${versionByteName} is not a valid version byte name. ` +
+      `Expected one of ${Object.keys(versionBytes).join(', ')}`;
     console.log(err, 'err in decodeCheck')
     throw new Error(err);
   }
@@ -304,76 +305,82 @@ console.log(`versionByte: ${versionByte}\n versionByteName: ${versionByteName}\n
   }
 
   const expectedChecksum = calculateChecksum(payload);
-  console.log(expectedChecksum, 'expectedChecksum in decodeCheck')
-  console.log(expectedChecksum.toString(), 'expectedChecksum.tostring in decodeCheck')
   if (!verifyChecksum(expectedChecksum, checksum)) {
     console.log(`in DecodeCheck - invalid checksum. expected ${expectedChecksum}, got ${checksum}`)
     throw new Error(`invalid checksum`);
   }
-const returndata = BrowserBuffer.from(data)
-  console.log('the return data in decodecheck is', returndata)
+  const returndata = BrowserBuffer.from(data)
+  // console.log('the return data in decodecheck is', returndata)
   return returndata;
 }
 
 export function encodeCheck(versionByteName, data) {
-  console.log('in the encodeCheck function')
-  console.log(data, 'data in encodeCheck')
+  
   if (isNull(data) || isUndefined(data)) {
     throw new Error('cannot encode null data');
   }
-
+  
   const versionByte = versionBytes[versionByteName];
 
-  if (isUndefined(versionByte)) {
-    throw new Error(
-      `${versionByteName} is not a valid version byte name. ` +
-        `Expected one of ${Object.keys(versionBytes).join(', ')}`
-    );
+  if (versionByte === undefined) {
+    const err = `${versionByteName} is not a valid version byte name. ` +
+      `Expected one of ${Object.keys(versionBytes).join(', ')}`
+    console.log(err, 'err in encodeCheck')
+    throw new Error(err);
   }
-  data = BrowserBuffer.from(data);
+  // console.log('it wasn not undefined')
 
+  data = BrowserBuffer.from(data);
+  
   const versionBuffer = BrowserBuffer.from([versionByte]);
+  
   const payload = BrowserBuffer.concat([versionBuffer, data]);
+  
   const checksum = calculateChecksum(payload);
   const unencoded = BrowserBuffer.concat([payload, checksum]);
-console.log(versionBuffer, 'versionBuffer in encodeCheck\n', payload, 'payload in encodeCheck\n', checksum, 'checksum in encodeCheck\n', unencoded, 'unencoded in encodeCheck\n')
+  
   return base32.encode(unencoded);
 }
 
 // Computes the CRC16-XModem checksum of `payload` in little-endian order
 function calculateChecksum(payload) {
+  // console.log(JSON.stringify(payload), 'JSON.stringify(payload) in calculateChecksum');
   const bold = "font-weight: bold";
-const normal = "font-weight: normal";
-  console.log(payload)
-  console.log('%cpayload in calculateChecksum%c', bold, normal); // <Buffer 30 73 76 fd e8 8e 4c d6 1c c0 fb 29 4a 17 86 b3 f1 d0 61 f5 f2 f1 ca 57 46 5f aa 93 22 11 b9 46 d6> payload in calculateChecksum
-  console.log(typeof payload, 'typeof payload in calculateChecksum') // object typeof payload in calculateChecksum
+  const normal = "font-weight: normal";
+  // console.log(payload)
+  // console.log('%cpayload in calculateChecksum%c', bold, normal); // <Buffer 30 73 76 fd e8 8e 4c d6 1c c0 fb 29 4a 17 86 b3 f1 d0 61 f5 f2 f1 ca 57 46 5f aa 93 22 11 b9 46 d6> payload in calculateChecksum
+  // console.log(typeof payload, 'typeof payload in calculateChecksum') // object typeof payload in calculateChecksum
   const payloadcopy = BrowserBuffer.from(payload);
-  console.log(typeof payloadcopy, 'typeof payloadcopy in calculateChecksum') // object typeof payloadcopy in calculateChecksum
-  console.log(payloadcopy, 'payload copy')
-  
+  // console.log(typeof payloadcopy, 'typeof payloadcopy in calculateChecksum') // object typeof payloadcopy in calculateChecksum
+  // console.log(payloadcopy, 'payload copy')
+  // console.log(JSON.stringify(payloadcopy), 'JSON.stringify(payloadcopy')
+  const enc = new TextEncoder();
+  const uintarray = Uint8Array.from(enc.encode('astring'));
+  // console.log(console.log(uintarray, 'uintarray in calculateChecksum'))
+  // console.log(JSON.stringify(uintarray), 'JSON.stringify(uintarray) in calculateChecksum')
   const checksum = BrowserBuffer.alloc(2);
 
-  console.log('checksum after alloc', checksum) // <Buffer 00 00> checksum after alloc
+  // console.log('checksum after alloc', checksum) // <Buffer 00 00> checksum after alloc
   const crccalc = crc.crc16xmodem(payload);
-  console.log(crccalc, 'crccalc in calculateChecksum') // 26624 crccalc in calculateChecksum
-  checksum.writeUInt16LE(crc.crc16xmodem(payload), 0); 
-  console.log(checksum, 'checksum in calculateChecksumafter writeUInt16LE'); // <Buffer 00 68> checksum in calculateChecksumafter writeUInt16LE
-  console.log('buf to string output', checksum.toString()) // 0068 buf to string output
+  // console.log(crccalc, 'crccalc in calculateChecksum') // 26624 crccalc in calculateChecksum
+  checksum.writeUInt16LE(crc.crc16xmodem(payload), 0);
+  // console.log(checksum, 'checksum in calculateChecksumafter writeUInt16LE'); // <Buffer 00 68> checksum in calculateChecksumafter writeUInt16LE
+  // console.log('buf to string output', checksum.toString()) // 0068 buf to string output
   // const checksum3 = calculateChecksum2(payload);
   const checksum2 = calculateChecksum2(payloadcopy);
-  
-  console.log('checksum2 after calculateChecksum2', checksum2)
-  
+
+  // console.log('checksum2 after calculateChecksum2', checksum2)
+
   // try the new way
 
-  
 
-  
+
+
   return checksum;
 }
 
 function calculateChecksum2(payload) {
-  console.log(payload, 'payload in calculateChecksum2')
+  // console.log(payload, 'payload in calculateChecksum2')
   const crcTable = [
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
     0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
@@ -422,7 +429,7 @@ function calculateChecksum2(payload) {
   checksum2[0] = crc16 & 0xff;
   checksum2[1] = (crc16 >> 8) & 0xff;
 
-  console.log(checksum2, 'checksum2 right before return');
+  // console.log(checksum2, 'checksum2 right before return');
   return checksum2;
 }
 

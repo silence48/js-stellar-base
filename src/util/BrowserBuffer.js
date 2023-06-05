@@ -1,85 +1,29 @@
-class BrowserBuffer {
+class BrowserBuffer extends Uint8Array {
   constructor(input, encodingOrOffset, length) {
+    console.log('TYPEOF input:', typeof input)
+    // console.log(input)
     if (typeof input === 'number') {
-      this.data = new Uint8Array(input);
-      this.data.fill(0);
-    } else if (typeof input === 'string') {
+      super(input);
+    }
+    else if (typeof input === 'string') {
+      let data;
       if (typeof encodingOrOffset === 'string') {
-        this.data = BrowserBuffer.decode(input, encodingOrOffset);
+        data = BrowserBuffer.decode(input, encodingOrOffset);
       } else {
-        this.data = new TextEncoder().encode(input);
+        data = new TextEncoder().encode(input);
       }
-    } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
-      this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input);
-    } else {
-      throw new Error('Unsupported data type');
+      super(data);
     }
-  }
-  /*
-  constructor(input, encodingOrOffset, length) {
-    if (typeof input === 'number') {
-      this.data = new Uint8Array(input);
-      this.data.fill(0);
-    } else if (typeof input === 'string') {
-      if (typeof encodingOrOffset === 'string') {
-        this.data = BrowserBuffer.decode(input, encodingOrOffset);
-      } else {
-        this.data = new TextEncoder().encode(input);
-      }
-    } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
-      this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
-    } else {
-      throw new Error('Unsupported data type');
+    else if (typeof input === 'object' && input instanceof ArrayBuffer) {
+      super(input, encodingOrOffset, length);
     }
-  }
-  
-  constructor(input, encodingOrOffset, length) {
-    console.log('trying to make a browserbuffer', input, encodingOrOffset, length)
-    console.log(`typeof input: ${typeof input}`)
-    console.log(`type of data is ${typeof input.data}`)
-    if (typeof input === 'number') {
-      this.data = new Uint8Array(input);
-      this.data.fill(0);
-    } else if (typeof input === 'string') {
-      if (typeof encodingOrOffset === 'string') {
-        this.data = BrowserBuffer.decode(input, encodingOrOffset);
-      } else {
-        this.data = new TextEncoder().encode(input);
-      }
-    } else if (typeof input === 'object' && input instanceof ArrayBuffer) {
-      this.data = new Uint8Array(input, encodingOrOffset, length);
-    } else if (BrowserBuffer.isBuffer(input)) {
-      this.data = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
-    } else {
-      throw new Error('Unsupported data type');
+    else if (BrowserBuffer.isBuffer(input)) {
+      const clonedData = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+      super(clonedData);
     }
-  }
-*/
-
-  static of(...items) {
-    return new BrowserBuffer(items);
-  }
-
-  static from(input, encodingOrOffset, length) {
-    console.log('trying to make a browserbuffer', input, encodingOrOffset, length)
-    if (typeof input === 'string') {
-      return new BrowserBuffer(input, encodingOrOffset);
+    else {
+      throw new Error(`Unsupported data type ${typeof input} ${input}`);
     }
-  
-    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
-      if (typeof encodingOrOffset === 'function') {
-        const mapfn = encodingOrOffset;
-        const arrayLike = Array.from(input, mapfn);
-        return new BrowserBuffer(arrayLike);
-      }
-      return new BrowserBuffer(input, encodingOrOffset, length);
-    }
-  
-    throw new Error('Unsupported data type');
   }
 
   static isBuffer(obj) {
@@ -95,112 +39,181 @@ class BrowserBuffer {
 
   static alloc(size, fill = 0) {
     const buffer = new BrowserBuffer(size);
-    if (typeof fill === 'string') {
-      const fillBuffer = BrowserBuffer.from(fill, 'utf8');
-      for (let i = 0; i < buffer.length; i += 1) {
-        buffer[i] = fillBuffer[i % fillBuffer.length];
+    buffer.fill(fill);
+    return buffer;
+  }
+  static from(input, encodingOrOffset, length) {
+    // console.log(input, 'input from', typeof input)
+    // console.log(encodingOrOffset, 'encodingOrOffset from')
+    if (Array.isArray(input)) {
+      return new BrowserBuffer(new Uint8Array(input));
+    }
+    /*
+    if (typeof input === 'string') {
+      if (encodingOrOffset === 'hex') {
+        // console.log('the encoding was hex and the input was: ', input)
+        const bytes = this.hexToBytes(input);
+        return new BrowserBuffer(bytes);
       }
-    } else {
-      buffer.fill(fill);
-    }
-    return buffer;
-  }
+      if (encodingOrOffset === 'utf8' || encodingOrOffset === 'base64') {
+        return new BrowserBuffer(this.decode(input, encodingOrOffset));
+      }
 
-  fill(value, offset = 0, end = this.data.length, encoding = 'utf8') {
-    console.log('filling a buffer with', value, offset, end, encoding)
-    const fillBuffer = BrowserBuffer.from(value, encoding);
-    for (let i = offset; i < end; i += 1) {
-      console.log('im filling a buffer with', fillBuffer[i % fillBuffer.length])
-      this[i] = fillBuffer[i];
-    }
-    return this;
-  }
+      throw new Error('Unsupported encoding type');
 
-  static concat(list, totalLength) {
-    if (typeof totalLength === 'undefined') {
-      totalLength = list.reduce((total, buf) => total + buf.length, 0);
     }
-    const buffer = BrowserBuffer.alloc(totalLength);
-    let offset = 0;
-    list.forEach(buf => {
-      buffer.set(buf, offset);
-      offset += buf.length;
-    });
-    return buffer;
+    */
+    if (typeof input === 'string') {
+      if ( encodingOrOffset === undefined) {
+        encodingOrOffset = 'utf8';
+      }
+      if (encodingOrOffset === 'hex') {
+        return new BrowserBuffer(this.decodeHex(input));
+      }
+      if (encodingOrOffset === 'utf8') {
+        let utf8Encoder = new TextEncoder(); // TextEncoder is built into modern browsers
+        let byteArray = utf8Encoder.encode(input);
+        return new BrowserBuffer(byteArray);
+      }
+      if (encodingOrOffset === 'base64') {
+        return new BrowserBuffer(this.decodeBase64(input));
+      } if (encodingOrOffset === 'ascii') {
+        let utf8Encoder = new TextEncoder(); // TextEncoder is built into modern browsers
+        let byteArray = utf8Encoder.encode(input);
+        return new BrowserBuffer(byteArray);
+      }
+      throw new Error(`Unsupported encoding type ${encodingOrOffset}, ${input}, ${typeof input}`);
+    }
+
+    if (typeof input === 'number') {
+      return BrowserBuffer.alloc(input);
+    }
+
+    if (typeof input === 'object' && (Array.isArray(input) || input instanceof ArrayBuffer || input instanceof Uint8Array)) {
+      if (typeof encodingOrOffset === 'function') {
+        const mapfn = encodingOrOffset;
+        const arrayLike = Array.from(input, mapfn);
+        return new BrowserBuffer(arrayLike);
+      }
+      return new BrowserBuffer(input, encodingOrOffset, length);
+    }
+
+    throw new Error(`Unsupported data type ${typeof input} ${input}`);
+  }
+  static hexToBytes = (hex) => {
+    let bytes = [];
+
+    for (let c = 0; c < hex.length; c += 2) {
+      bytes.push(parseInt(hex.substr(c, 2), 16));
+    }
+    // console.log(bytes, 'bytesfrom hextobytes')
+    return bytes;
+  };
+
+  static decodeHex(hex) {
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+    }
+    return bytes;
   }
 
   static decode(string, encoding) {
     switch (encoding) {
       case 'utf8':
-        return new TextEncoder().encode(string);
-      case 'ascii':
-        return new TextEncoder().encode(string);
+        return new TextDecoder().decode(string);
       case 'base64':
-        return this.decodeBase64(string);
+        return BrowserBuffer.decodeBase64(string);
+      case 'ascii':
+        return new TextDecoder().decode(string);
       case 'hex':
-        return this.decodeHex(string);
+        return BrowserBuffer.decodeHex(string);
       default:
-        throw new Error('Unsupported encoding type');
+        throw new Error(`Unsupported encoding type ${string}, ${encoding}`);
     }
   }
 
-  static decodeBase64(string) {
-    const binaryString = atob(string);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i += 1) {
+  static decodeBase64(base64) {
+    console.log('decoding base64', base64)
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes;
   }
 
-  static decodeHex(string) {
-    const size = string.length / 2;
-    const array = new Uint8Array(size);
-    for (let i = 0; i < size; i += 1) {
-      array[i] = parseInt(string.substr(i * 2, 2), 16);
+  static concat(list, totalLength) {
+    if (!Array.isArray(list)) {
+      throw new Error("Concat function takes an array as argument");
     }
-    return array;
-  }
 
-  get length() {
-    return this.data.length;
-  }
-
-  toString(encoding = 'utf8') {
-    switch (encoding) {
-      case 'hex':
-        return this.toHex();
-      case 'utf8':
-        return new TextDecoder().decode(this);
-      case 'ascii': // Treat 'ascii' encoding the same as 'utf8'
-        return new TextDecoder().decode(this);
-      case 'base64':
-        return this.toBase64();
-      default:
-        throw new Error('Unsupported encoding type');
+    if (list.length === 0) {
+      return new BrowserBuffer(0);
     }
-  }
-
-  equals(otherBuffer) {
-    if (!(otherBuffer instanceof BrowserBuffer)) {
-      throw new Error('Argument must be a BrowserBuffer');
+    if (list.length === 1) {
+      return list[0];
     }
-    return this.data.every((value, i) => value === otherBuffer.data[i]);
+
+    if (totalLength === undefined) {
+      totalLength = list.reduce((acc, item) => acc + item.length, 0);
+    }
+
+    let buffer = new BrowserBuffer(totalLength);
+    let pos = 0;
+    for (let i = 0; i < list.length; i += 1) {
+      let item = list[i];
+      item.copy(buffer, pos);
+      pos += item.length;
+    }
+
+    return buffer;
   }
 
-  slice(start = 0, end = this.data.length) {
-    return new BrowserBuffer(this.data.slice(start, end));
+  writeUInt16LE(value, offset) {
+    if (offset < 0 || offset + 2 > this.length) {
+      throw new Error('Index out of range');
+    }
+    this[offset] = value & 0xff; // Write the low byte
+    this[offset + 1] = (value >> 8) & 0xff; // Write the high byte
   }
 
-  copy(targetBuffer, targetStart = 0, sourceStart = 0, sourceEnd = this.data.length) {
-    const sourceData = this.data.slice(sourceStart, sourceEnd);
-    targetBuffer.data.set(sourceData, targetStart);
+  fill(value, offset = 0, end = this.length, encoding = 'utf8') {
+    if (typeof value === 'number') {
+      super.fill(value, offset, end);
+    } else if (typeof value === 'string') {
+      const fillBuffer = BrowserBuffer.from(value, encoding);
+      super.fill(fillBuffer[0], offset, end);
+    } else {
+      throw new Error('Unsupported fill type');
+    }
+    return this;
+  }
+
+  _matchAtIndex(index, searchBuffer, searchLength = searchBuffer.length) {
+    for (let j = 0; j < searchLength; j += 1) {
+      if (index + j >= this.length || this[index + j] !== searchBuffer[j]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  slice(start = 0, end = this.length) {
+    const slicedData = super.slice(start, end);
+    return new BrowserBuffer(slicedData.buffer);
+  }
+
+  copy(targetBuffer, targetStart = 0, sourceStart = 0, sourceEnd = this.length) {
+    const sourceData = this.slice(sourceStart, sourceEnd);
+    targetBuffer.set(sourceData, targetStart);
     return sourceData.length;
   }
 
-  compare(otherBuffer, targetStart = 0, targetEnd = otherBuffer.data.length, sourceStart = 0, sourceEnd = this.data.length) {
-    const targetData = otherBuffer.data.slice(targetStart, targetEnd);
-    const sourceData = this.data.slice(sourceStart, sourceEnd);
+  compare(otherBuffer, targetStart = 0, targetEnd = otherBuffer.length, sourceStart = 0, sourceEnd = this.length) {
+    const targetData = otherBuffer.slice(targetStart, targetEnd);
+    const sourceData = this.slice(sourceStart, sourceEnd);
     return sourceData.every((value, i) => value === targetData[i]) ? 0 : 1;
   }
 
@@ -208,15 +221,15 @@ class BrowserBuffer {
     const searchBuffer = BrowserBuffer.from(value, encoding);
     const searchLength = searchBuffer.length;
 
-    for (let i = byteOffset; i < this.data.length - searchLength + 1; i += 1) {
-      if (this._matchAtIndex(i, searchBuffer)) {
+    for (let i = byteOffset; i < this.length - searchLength + 1; i += 1) {
+      if (this._matchAtIndex(i, searchBuffer, searchLength)) {
         return i;
       }
     }
     return -1;
   }
 
-  lastIndexOf(value, byteOffset = this.data.length - 1, encoding = 'utf8') {
+  lastIndexOf(value, byteOffset = this.length - 1, encoding = 'utf8') {
     const searchBuffer = BrowserBuffer.from(value, encoding);
     const searchLength = searchBuffer.length;
 
@@ -228,14 +241,46 @@ class BrowserBuffer {
     return -1;
   }
 
-  _matchAtIndex(index, searchBuffer, searchLength = searchBuffer.length) {
-    for (let j = 0; j < searchLength; j += 1) {
-      if (this.data[index + j] !== searchBuffer[j]) {
-        return false;
-      }
+  equals(otherBuffer) {
+    if (!(otherBuffer instanceof BrowserBuffer)) {
+      throw new Error('Argument must be a BrowserBuffer');
     }
-    return true;
+    return this.every((value, i) => value === otherBuffer[i]);
   }
+
+  toString(encoding = 'utf8') {
+    if (encoding === 'hex') {
+        let hex = '';
+        for (let i = 0; i < this.byteLength; i++) {
+            let byte = this[i].toString(16);
+            hex += (byte.length === 1 ? '0' : '') + byte;
+        }
+        return hex;
+    } 
+    if (encoding === 'utf8') {
+        let utf8Decoder = new TextDecoder();
+        return utf8Decoder.decode(this);
+    } 
+    if (encoding === 'base64') {
+        let binary = '';
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        for (let i = 0; i < this.byteLength; i++) {
+            binary += chars.charAt(this[i] >> 2) + chars.charAt(((this[i] & 3) << 4) | (this[i + 1] >> 4));
+            if (i < this.byteLength - 2) {
+                binary += chars.charAt(((this[i + 1] & 15) << 2) | (this[i + 2] >> 6)) + chars.charAt(this[i + 2] & 63);
+            } else if (i < this.byteLength - 1) {
+                binary += chars.charAt((this[i + 1] & 15) << 2) + "=";
+            } else {
+                binary += "==";
+            }
+            i += 2;
+        }
+        console.log('returning binary, ', binary)
+        return binary;
+    }
+    throw new Error(`Unsupported encoding: ${encoding}, ${this}}`);
+}
+
 
   toHex() {
     let hex = '';
@@ -248,16 +293,11 @@ class BrowserBuffer {
 
   toBase64() {
     let binary = '';
-    const len = this.byteLength;
+    const len = this.length;
     for (let i = 0; i < len; i += 1) {
       binary += String.fromCharCode(this[i]);
     }
     return btoa(binary);
-  }
-
-  writeUInt16LE(value, offset = 0) {
-    this[offset] = value & 0xff;
-    this[offset + 1] = (value >> 8) & 0xff;
   }
 }
 

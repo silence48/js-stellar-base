@@ -3,7 +3,6 @@
 import nacl from 'tweetnacl';
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
-
 import BrowserBuffer from  './util/BrowserBuffer'
 
 import { sign, verify, generate } from './signing';
@@ -27,8 +26,8 @@ import xdr from './xdr';
  * @constructor
  * @param {object} keys At least one of keys must be provided.
  * @param {string} keys.type Public-key signature system name. (currently only `ed25519` keys are supported)
- * @param {Uint8Array} [keys.publicKey] Raw public key
- * @param {Uint8Array} [keys.secretKey] Raw secret key (32-byte secret seed in ed25519`)
+ * @param {BrowserBuffer} [keys.publicKey] Raw public key
+ * @param {BrowserBuffer} [keys.secretKey] Raw secret key (32-byte secret seed in ed25519`)
  */
 export class Keypair {
   constructor(keys) {
@@ -40,6 +39,11 @@ export class Keypair {
 
     if (keys.secretKey) {
       // Probably should make a copy here...
+      console.log(keys.secretKey)
+      console.log(typeof keys.secretKey)
+      const message = JSON.stringify(keys)
+
+
       keys.secretKey = BrowserBuffer.from(keys.secretKey);
 
       if (keys.secretKey.length !== 32) {
@@ -79,7 +83,7 @@ export class Keypair {
   /**
    * Creates a new `Keypair` object from ed25519 secret key seed raw bytes.
    *
-   * @param {Uint8Array} rawSeed Raw 32-byte ed25519 secret key seed
+   * @param {BrowserBuffer} rawSeed Raw 32-byte ed25519 secret key seed
    * @returns {Keypair}
    */
   static fromRawEd25519Seed(rawSeed) {
@@ -161,7 +165,7 @@ export class Keypair {
 
   /**
    * Returns raw public key
-   * @returns {Uint8Array}
+   * @returns {BrowserBuffer}
    */
   rawPublicKey() {
     return this._publicKey;
@@ -199,7 +203,7 @@ export class Keypair {
 
   /**
    * Returns raw secret key.
-   * @returns {Uint8Array}
+   * @returns {BrowserBuffer}
    */
   rawSecretKey() {
     return this._secretSeed;
@@ -215,8 +219,8 @@ export class Keypair {
 
   /**
    * Signs data.
-   * @param {Uint8Array} data Data to sign
-   * @returns {Uint8Array}
+   * @param {BrowserBuffer} data Data to sign
+   * @returns {BrowserBuffer}
    */
   sign(data) {
     if (!this.canSign()) {
@@ -228,8 +232,8 @@ export class Keypair {
 
   /**
    * Verifies if `signature` for `data` is valid.
-   * @param {Uint8Array} data Signed data
-   * @param {Uint8Array} signature Signature
+   * @param {BrowserBuffer} data Signed data
+   * @param {BrowserBuffer} signature Signature
    * @returns {boolean}
    */
   verify(data, signature) {
@@ -239,7 +243,7 @@ export class Keypair {
   /**
    * Returns the decorated signature (hint+sig) for arbitrary data.
    *
-   * @param  {Uint8Array} data  arbitrary data to sign
+   * @param  {BrowserBuffer} data  arbitrary data to sign
    * @return {xdr.DecoratedSignature}   the raw signature structure which can be
    *     added directly to a transaction envelope
    *
@@ -258,7 +262,7 @@ export class Keypair {
    *  The hint is defined as the last 4 bytes of the signer key XORed with last
    *  4 bytes of the payload (zero-left-padded if necessary).
    *
-   * @param  {Uint8Array} data    data to both sign and treat as the payload
+   * @param  {BrowserBuffer} data    data to both sign and treat as the payload
    * @return {xdr.DecoratedSignature}
    *
    * @see https://github.com/stellar/stellar-protocol/blob/master/core/cap-0040.md#signature-hint

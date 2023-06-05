@@ -26,6 +26,7 @@ class BrowserBuffer {
   }
 
   static from(input, encodingOrOffset, length) {
+    console.log('input from ', input)
     if (typeof input === 'string') {
       if (typeof encodingOrOffset === 'string') {
         return new BrowserBuffer(BrowserBuffer.decode(input, encodingOrOffset));
@@ -33,7 +34,7 @@ class BrowserBuffer {
       return new BrowserBuffer(new TextEncoder().encode(input));
     }
 
-    if (typeof input === 'object' && (Array.isArray(input) || ArrayBuffer.isView(input) || input instanceof ArrayBuffer || BrowserBuffer.isBuffer(input))) {
+    if (typeof input === 'object' && (Array.isArray(input) || ArrayBuffer.isView(input) || input instanceof ArrayBuffer || input instanceof Uint8Array || BrowserBuffer.isBuffer(input))) {
       if (typeof encodingOrOffset === 'function') {
         const mapfn = encodingOrOffset;
         const arrayLike = Array.from(input, mapfn);

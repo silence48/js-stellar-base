@@ -76,7 +76,7 @@ export class FeeBumpTransaction extends TransactionBase {
    *
    * It is composed of a 4 prefix bytes followed by the xdr-encoded form
    * of this transaction.
-   * @returns {Uint8Array}
+   * @returns {BrowserBuffer}
    */
   signatureBase() {
     const taggedTransaction =

@@ -62,6 +62,7 @@ function checkFastSigningNode() {
   };
 
   actualMethods.verify = (data, signature, publicKey) => {
+    console.log(JSON.stringify(data), JSON.stringify(signature), JSON.stringify(publicKey), 'VERIFY METHOD')
     data = BrowserBuffer.from(data);
     try {
       return sodium.crypto_sign_verify_detached(signature, data, publicKey);

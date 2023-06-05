@@ -105,6 +105,7 @@ export class Asset {
    * @returns {xdr.Asset | xdr.ChangeTrustAsset | xdr.TrustLineAsset} XDR Asset object
    */
   _toXDRObject(xdrAsset = xdr.Asset) {
+    console.log(xdrAsset, 'xdrAsset')
     if (this.isNative()) {
       return xdrAsset.assetTypeNative();
     }

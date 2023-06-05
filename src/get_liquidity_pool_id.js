@@ -18,7 +18,7 @@ export const LiquidityPoolFeeV18 = 30;
  * @param {Asset}  liquidityPoolParameters.assetB – The second asset in the Pool, it must respect the rule assetA < assetB.
  * @param {number} liquidityPoolParameters.fee    – The liquidity pool fee. For now the only fee supported is `30`.
  *
- * @return {Uint8Array} the raw Pool ID buffer, which can be stringfied with `toString('hex')`
+ * @return {BrowserBuffer} the raw Pool ID buffer, which can be stringfied with `toString('hex')`
  */
 export function getLiquidityPoolId(
   liquidityPoolType,
